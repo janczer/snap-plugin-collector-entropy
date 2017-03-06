@@ -2,4 +2,4 @@ name: entropy
 type: collector
 maintainer: janczer 
 license: Apache-2.0
-description: "Collects Linux avaliable entropy from /proc/."
+description: "Collects Linux avaliable entropy from /proc/sys/kernel/random/entropy_avail."
