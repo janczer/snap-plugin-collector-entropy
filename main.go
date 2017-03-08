@@ -22,12 +22,10 @@ limitations under the License.
 package main
 
 import (
-	"os"
-
-	"github.com/intelsdi-x/snap/control/plugin"
+	"github.com/intelsdi-x/snap-plugin-lib-go/v1/plugin"
 	"github.com/janczer/snap-plugin-collector-entropy/entropy"
 )
 
 func main() {
-	plugin.Start(entropy.Meta(), entropy.New(), os.Args[1])
+	plugin.StartCollector(entropy.EntropyCollector{}, entropy.PluginName, entropy.PluginVersion)
 }

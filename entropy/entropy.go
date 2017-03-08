@@ -1,9 +1,7 @@
 package entropy
 
 import (
-	"github.com/intelsdi-x/snap/control/plugin"
-	"github.com/intelsdi-x/snap/control/plugin/cpolicy"
-	"github.com/intelsdi-x/snap/core"
+	"github.com/intelsdi-x/snap-plugin-lib-go/v1/plugin"
 	"io/ioutil"
 	"strings"
 	"time"
@@ -13,37 +11,30 @@ const (
 	vendor = "janczer"
 
 	//pluginName namespace part
-	pluginName = "entropy"
+	PluginName = "entropy"
 
 	//fs namespace part
 	fs = "procfs"
 
 	// veersion of entropy plugin
-	version = 1
-
-	//pluginType type of plugin
-	pluginType = plugin.CollectorPluginType
+	PluginVersion = 1
 )
 
 var entropyInfo = "/proc/sys/kernel/random/entropy_avail"
 
-type Plugin struct{}
+type EntropyCollector struct{}
 
-func New() *Plugin {
-	return &Plugin{}
-}
+func (EntropyCollector) CollectMetrics(mts []plugin.Metric) ([]plugin.Metric, error) {
 
-func (p *Plugin) CollectMetrics(mts []plugin.MetricType) ([]plugin.MetricType, error) {
-
-	metrics := make([]plugin.MetricType, 0)
+	metrics := make([]plugin.Metric, 0)
 	runTime := time.Now()
 	value, err := getEntropy()
 	if err == nil {
-		mt := plugin.MetricType{
-			Data_:      value,
-			Namespace_: core.NewNamespace(vendor, fs, pluginName),
-			Timestamp_: runTime,
-			Version_:   1,
+		mt := plugin.Metric{
+			Data:      value,
+			Namespace: plugin.NewNamespace(vendor, fs, PluginName),
+			Timestamp: runTime,
+			Version:   1,
 		}
 		metrics = append(metrics, mt)
 	}
@@ -60,32 +51,21 @@ func getEntropy() (string, error) {
 	return strings.Replace(string(value), "\n", "", -1), nil
 }
 
-func (p *Plugin) GetMetricTypes(cfg plugin.ConfigType) ([]plugin.MetricType, error) {
-	metricTypes := []plugin.MetricType{}
+func (EntropyCollector) GetMetricTypes(cfg plugin.Config) ([]plugin.Metric, error) {
+	metrics := []plugin.Metric{}
 
-	m := plugin.MetricType{
-		Namespace_:   core.NewNamespace(vendor, fs, pluginName),
-		Description_: "Entropy metric",
+	m := plugin.Metric{
+		Namespace:   plugin.NewNamespace(vendor, fs, PluginName),
+		Description: "Entropy metric",
 	}
-	metricTypes = append(metricTypes, m)
+	metrics = append(metrics, m)
 
-	return metricTypes, nil
+	return metrics, nil
 }
 
 // GetConfigPolicy returns config policy
 // It returns error in case retrieval was not successful
-func (p *Plugin) GetConfigPolicy() (*cpolicy.ConfigPolicy, error) {
-	cp := cpolicy.New()
-	return cp, nil
-}
-
-func Meta() *plugin.PluginMeta {
-	return plugin.NewPluginMeta(
-		pluginName,
-		version,
-		pluginType,
-		[]string{},
-		[]string{plugin.SnapGOBContentType},
-		plugin.ConcurrencyCount(1),
-	)
+func (EntropyCollector) GetConfigPolicy() (plugin.ConfigPolicy, error) {
+	cp := plugin.NewConfigPolicy()
+	return *cp, nil
 }
