@@ -47,15 +47,23 @@ func (EntropyCollector) CollectMetrics(mts []plugin.Metric) ([]plugin.Metric, er
 
 	metrics := make([]plugin.Metric, 0)
 	runTime := time.Now()
-	value, err := getEntropy()
-	if err == nil {
-		mt := plugin.Metric{
-			Data:      value,
-			Namespace: plugin.NewNamespace(vendor, fs, PluginName),
-			Timestamp: runTime,
-			Version:   1,
+	for _, mt := range mts {
+		var value string
+		var err error
+		if val, err := mt.Config.GetString("test"); err == nil {
+			value = val
+		} else {
+			value, err = getEntropy()
 		}
-		metrics = append(metrics, mt)
+		if err == nil {
+			mt := plugin.Metric{
+				Data:      value,
+				Namespace: plugin.NewNamespace(vendor, fs, PluginName),
+				Timestamp: runTime,
+				Version:   1,
+			}
+			metrics = append(metrics, mt)
+		}
 	}
 
 	return metrics, nil

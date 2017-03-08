@@ -26,9 +26,51 @@ import (
 	"time"
 
 	"github.com/intelsdi-x/snap-plugin-lib-go/v1/plugin"
-	_ "github.com/smartystreets/goconvey/convey"
+	. "github.com/smartystreets/goconvey/convey"
 )
 
 func TestEntropyCollector(t *testing.T) {
+
+	ec := EntropyCollector{}
+
+	Convey("Test EntropyCollector", t, func() {
+		Convey("Collect Entropy", func() {
+			metrics := []plugin.Metric{
+				plugin.Metric{
+					Namespace: plugin.NewNamespace("entropy", "test"),
+					Config:    map[string]interface{}{"test": "812"},
+					Data:      "812",
+					Timestamp: time.Now(),
+				},
+			}
+			mts, err := ec.CollectMetrics(metrics)
+			So(mts, ShouldNotBeEmpty)
+			So(err, ShouldBeNil)
+			So(mts[0].Data, ShouldEqual, "812")
+		})
+	})
+
+	Convey("Test GetMetricTypes", t, func() {
+		Convey("Collect String", func() {
+			mt, err := ec.GetMetricTypes(nil)
+			So(err, ShouldBeNil)
+			So(len(mt), ShouldEqual, 1)
+		})
+	})
+
+	Convey("Test GetConfigPolicy", t, func() {
+		Convey("No error returned", func() {
+			_, err := ec.GetConfigPolicy()
+			So(err, ShouldBeNil)
+		})
+	})
+
+	Convey("Test getEntropy", t, func() {
+		Convey("No error returned", func() {
+			e, err := getEntropy()
+			So(err, ShouldBeNil)
+			So(len(e), ShouldBeGreaterThan, 0)
+		})
+	})
 
 }
