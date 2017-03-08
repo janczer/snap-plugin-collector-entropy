@@ -15,8 +15,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+OS = $(shell uname -s | tr '[:upper:]' '[:lower:]')
+ARCH = $(shell uname -m)
+
 default:
+	$(MAKE) deps
 	$(MAKE) all
 
+deps:
+	bash -c "./scripts/deps.sh"
+test:
+	bash -c "./scripts/test.sh $(SNAP_TEST_TYPE)"
+test-small:
+	bash -c "./scripts/test.sh small"
+
 all:
-	bash -c "./scripts/build.sh"
+	bash -c "./scripts/build.sh $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))"
