@@ -1,37 +1,39 @@
-hash: 6e141e14e4a9683baa951d1533c0c0a9cbd407ce62a373ff9d5402dadcc467fc
-updated: 2017-03-06T20:31:31.926696007+01:00
+hash: 0fe57e83f4fbd033ba99f9f241e947dc1a8d78003aa25c49a087f666b9cafd18
+updated: 2017-03-08T17:24:10.309715032+01:00
 imports:
-- name: github.com/intelsdi-x/snap
-  version: 4b6dc4090ac3ab0f800e656bfe3584e30f25c12d
+- name: github.com/golang/protobuf
+  version: 888eb0692c857ec880338addf316bd662d5e630e
   subpackages:
-  - control/plugin
-  - control/plugin/cpolicy
-  - control/plugin/encoding
-  - control/plugin/encrypter
-  - core
-  - core/cdata
-  - core/ctypes
-  - core/serror
-  - pkg/ctree
-  - pkg/schedule
-  - pkg/stringutils
-  - scheduler/wmap
-- name: github.com/robfig/cron
-  version: 32d9c273155a0506d27cf73dd1246e86a470997e
-- name: github.com/Sirupsen/logrus
-  version: be52937128b38f1d99787bb476c789e2af1147f1
-- name: golang.org/x/sys
-  version: 8f0908ab3b2457e2e15403d3697c9ef5cb4b57a9
+  - proto
+- name: github.com/intelsdi-x/snap-plugin-lib-go
+  version: 4b5999a62ffb7604f173c1ab3c2205ba8b559624
   subpackages:
-  - unix
-- name: gopkg.in/yaml.v2
-  version: c1cd2254a6dd314c9d73c338c12688c9325d85c6
+  - v1/plugin
+  - v1/plugin/rpc
+- name: github.com/julienschmidt/httprouter
+  version: 8c199fb6259ffc1af525cc3ad52ee60ba8359669
+- name: golang.org/x/net
+  version: 154d9f9ea81208afed560f4cf27b4860c8ed1904
+  subpackages:
+  - context
+  - http2
+  - http2/hpack
+  - internal/timeseries
+  - lex/httplex
+  - trace
+- name: google.golang.org/grpc
+  version: 0032a855ba5c8a3c8e0d71c2deef354b70af1584
+  subpackages:
+  - codes
+  - credentials
+  - grpclog
+  - internal
+  - metadata
+  - naming
+  - peer
+  - transport
 testImports:
 - name: github.com/smartystreets/goconvey
-  version: 995f5b2e021c69b8b028ba6d0b05c1dd500783db
+  version: d4c757aa9afd1e2fc1832aaab209b5794eb336e1
   subpackages:
   - convey
-- name: github.com/stretchr/testify
-  version: 976c720a22c8eb4eb6a0b4348ad85ad12491a506
-  subpackages:
-  - suite

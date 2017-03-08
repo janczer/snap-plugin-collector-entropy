@@ -8,6 +8,7 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"net"
 	"net/http"
 	"os"
 	"os/exec"
@@ -43,6 +44,7 @@ func flags() {
 	flag.StringVar(&watchedSuffixes, "watchedSuffixes", ".go", "A comma separated list of file suffixes to watch for modifications (default: .go).")
 	flag.StringVar(&excludedDirs, "excludedDirs", "vendor,node_modules", "A comma separated list of directories that will be excluded from being watched")
 	flag.StringVar(&workDir, "workDir", "", "set goconvey working directory (default current directory)")
+	flag.BoolVar(&autoLaunchBrowser, "launchBrowser", true, "toggle auto launching of browser (default: true)")
 
 	log.SetOutput(os.Stdout)
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
@@ -74,10 +76,13 @@ func main() {
 	longpollChan := make(chan chan string)
 	executor := executor.NewExecutor(tester, parser, longpollChan)
 	server := api.NewHTTPServer(working, watcherInput, executor, longpollChan)
+	listener := createListener()
 	go runTestOnUpdates(watcherOutput, executor, server)
 	go watcher.Listen()
-	go launchBrowser(host, port)
-	serveHTTP(server)
+	if autoLaunchBrowser {
+		go launchBrowser(listener.Addr().String())
+	}
+	serveHTTP(server, listener)
 }
 
 func browserCmd() (string, bool) {
@@ -90,15 +95,15 @@ func browserCmd() (string, bool) {
 	return cmd, ok
 }
 
-func launchBrowser(host string, port int) {
+func launchBrowser(addr string) {
 	browser, ok := browserCmd()
 	if !ok {
 		log.Printf("Skipped launching browser for this OS: %s", runtime.GOOS)
 		return
 	}
 
-	log.Printf("Launching browser on %s:%d", host, port)
-	url := fmt.Sprintf("http://%s:%d", host, port)
+	log.Printf("Launching browser on %s", addr)
+	url := fmt.Sprintf("http://%s", addr)
 	cmd := exec.Command(browser, url)
 
 	output, err := cmd.CombinedOutput()
@@ -151,10 +156,21 @@ func testFilesImportTheirOwnPackage(packagePath string) bool {
 	return false
 }
 
-func serveHTTP(server contract.Server) {
+func createListener() net.Listener {
+	l, err := net.Listen("tcp", fmt.Sprintf("%s:%d", host, port))
+	if err != nil {
+		log.Println(err)
+	}
+	if l == nil {
+		os.Exit(1)
+	}
+	return l
+}
+
+func serveHTTP(server contract.Server, listener net.Listener) {
 	serveStaticResources()
 	serveAjaxMethods(server)
-	activateServer()
+	activateServer(listener)
 }
 
 func serveStaticResources() {
@@ -172,9 +188,9 @@ func serveAjaxMethods(server contract.Server) {
 	http.HandleFunc("/pause", server.TogglePause)
 }
 
-func activateServer() {
-	log.Printf("Serving HTTP at: http://%s:%d\n", host, port)
-	err := http.ListenAndServe(fmt.Sprintf("%s:%d", host, port), nil)
+func activateServer(listener net.Listener) {
+	log.Printf("Serving HTTP at: http://%s\n", listener.Addr())
+	err := http.Serve(listener, nil)
 	if err != nil {
 		log.Println(err)
 	}
@@ -254,16 +270,17 @@ func getWorkDir() string {
 }
 
 var (
-	port            int
-	host            string
-	gobin           string
-	nap             time.Duration
-	packages        int
-	cover           bool
-	depth           int
-	timeout         string
-	watchedSuffixes string
-	excludedDirs    string
+	port              int
+	host              string
+	gobin             string
+	nap               time.Duration
+	packages          int
+	cover             bool
+	depth             int
+	timeout           string
+	watchedSuffixes   string
+	excludedDirs      string
+	autoLaunchBrowser bool
 
 	static  string
 	reports string
