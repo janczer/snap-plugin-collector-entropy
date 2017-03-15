@@ -2,7 +2,7 @@
 
 http://www.apache.org/licenses/LICENSE-2.0.txt
 
-Copyright 2016 janczer
+Copyright 2017 janczer
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ package entropy
 import (
 	"github.com/intelsdi-x/snap-plugin-lib-go/v1/plugin"
 	"io/ioutil"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -39,45 +40,46 @@ const (
 	PluginVersion = 1
 )
 
+// entropyInfo source of data for metric
 var entropyInfo = "/proc/sys/kernel/random/entropy_avail"
 
 type EntropyCollector struct{}
 
+// CollectMetrics returns list of collect metrics
 func (EntropyCollector) CollectMetrics(mts []plugin.Metric) ([]plugin.Metric, error) {
-
 	metrics := make([]plugin.Metric, 0)
-	runTime := time.Now()
-	for _, mt := range mts {
-		var value string
-		var err error
-		if val, err := mt.Config.GetString("test"); err == nil {
-			value = val
-		} else {
-			value, err = getEntropy()
+	v, err := getEntropy()
+	if err == nil {
+		mt := plugin.Metric{
+			Data:      v,
+			Namespace: plugin.NewNamespace(vendor, fs, PluginName),
+			Timestamp: time.Now(),
+			Version:   PluginVersion,
 		}
-		if err == nil {
-			mt := plugin.Metric{
-				Data:      value,
-				Namespace: plugin.NewNamespace(vendor, fs, PluginName),
-				Timestamp: runTime,
-				Version:   1,
-			}
-			metrics = append(metrics, mt)
-		}
+		metrics = append(metrics, mt)
 	}
 
 	return metrics, nil
 }
 
-func getEntropy() (string, error) {
-	value, err := ioutil.ReadFile(entropyInfo)
+// getEntropy read file entropyInfo and get value
+// if function have error then first value will be 0 and second error
+func getEntropy() (uint64, error) {
+	data, err := ioutil.ReadFile(entropyInfo)
 	if err != nil {
-		return "", err
+		return 0, err
+	}
+	value := strings.Replace(string(data), "\n", "", -1)
+
+	entropy, err := strconv.ParseUint(value, 10, 64)
+	if err != nil {
+		return 0, err
 	}
 
-	return strings.Replace(string(value), "\n", "", -1), nil
+	return entropy, nil
 }
 
+// GetMetricTypes returns list with one available metric type
 func (EntropyCollector) GetMetricTypes(cfg plugin.Config) ([]plugin.Metric, error) {
 	metrics := []plugin.Metric{}
 
@@ -90,7 +92,7 @@ func (EntropyCollector) GetMetricTypes(cfg plugin.Config) ([]plugin.Metric, erro
 	return metrics, nil
 }
 
-// GetConfigPolicy returns config policy
+// GetConfigPolicy returns ConfigPolicy
 // It returns error in case retrieval was not successful
 func (EntropyCollector) GetConfigPolicy() (plugin.ConfigPolicy, error) {
 	cp := plugin.NewConfigPolicy()

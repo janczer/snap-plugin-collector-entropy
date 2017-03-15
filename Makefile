@@ -1,7 +1,7 @@
 # http://www.apache.org/licenses/LICENSE-2.0.txt
 #
 #
-# Copyright 2015 janczer
+# Copyright 2017 janczer
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,11 +19,8 @@ OS = $(shell uname -s | tr '[:upper:]' '[:lower:]')
 ARCH = $(shell uname -m)
 
 default:
-	$(MAKE) deps
 	$(MAKE) all
 
-deps:
-	bash -c "./scripts/deps.sh"
 test:
 	bash -c "./scripts/test.sh $(SNAP_TEST_TYPE)"
 test-small:

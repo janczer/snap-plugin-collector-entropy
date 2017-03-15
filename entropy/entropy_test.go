@@ -3,7 +3,7 @@
 /*
 http://www.apache.org/licenses/LICENSE-2.0.txt
 
-Copyright 2016 janczer
+Copyright 2017 janczer
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -22,31 +22,40 @@ limitations under the License.
 package entropy
 
 import (
+	"os"
 	"testing"
-	"time"
 
 	"github.com/intelsdi-x/snap-plugin-lib-go/v1/plugin"
 	. "github.com/smartystreets/goconvey/convey"
 )
 
+var srcMockFile = "/tmp/mock_entropy_avail"
+
+func createMockFile() {
+	deleteMockFile()
+	srcMockFileCont := []byte("444\n")
+	f, _ := os.Create(srcMockFile)
+	f.Write(srcMockFileCont)
+	f.Close()
+}
+
+func deleteMockFile() {
+	os.Remove(srcMockFile)
+}
+
 func TestEntropyCollector(t *testing.T) {
 
 	ec := EntropyCollector{}
+	createMockFile()
 
 	Convey("Test EntropyCollector", t, func() {
 		Convey("Collect Entropy", func() {
-			metrics := []plugin.Metric{
-				plugin.Metric{
-					Namespace: plugin.NewNamespace("entropy", "test"),
-					Config:    map[string]interface{}{"test": "812"},
-					Data:      "812",
-					Timestamp: time.Now(),
-				},
-			}
+			entropyInfo = srcMockFile
+			metrics := []plugin.Metric{plugin.Metric{}}
 			mts, err := ec.CollectMetrics(metrics)
 			So(mts, ShouldNotBeEmpty)
 			So(err, ShouldBeNil)
-			So(mts[0].Data, ShouldEqual, "812")
+			So(mts[0].Data, ShouldEqual, 444)
 		})
 	})
 
@@ -69,8 +78,9 @@ func TestEntropyCollector(t *testing.T) {
 		Convey("No error returned", func() {
 			e, err := getEntropy()
 			So(err, ShouldBeNil)
-			So(len(e), ShouldBeGreaterThan, 0)
+			So(e, ShouldBeGreaterThan, 0)
 		})
 	})
+	deleteMockFile()
 
 }

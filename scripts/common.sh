@@ -4,7 +4,7 @@ set -e
 set -u
 set -o pipefail
 
-LOG_LEVEL="${LOG_LEVEL:-7}"
+LOG_LEVEL="${LOG_LEVEL:-6}"
 NO_COLOR="${NO_COLOR:-}"
 
 trap_exitcode() {

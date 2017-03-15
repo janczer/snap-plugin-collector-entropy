@@ -5,14 +5,14 @@ This plugin collects entropy metrics from file `/proc/sys/kernel/random/entropy_
 It's used in the [Snap framework](https://github.com/intelsdi-x/snap).
 
 1. [Getting Started](#getting-started)
-  * [Installation] (#installation)
+  * [Installation](#installation)
   * [Configuration and Usage](#configuration-and-usage)
 
 ## Getting Started
 
 ### Installation
 #### Build the plugin binary:
-Fork https://github.com/intelsdi-x/snap-plugin-collector-entropy
+Fork https://github.com/janczer/snap-plugin-collector-entropy
 Clone repo into `$GOPATH/src/github.com/intelsdi-x/`:
 
 ```
@@ -23,8 +23,8 @@ Build the Snap entropy plugin by running make within the cloned repo:
 ```
 $ make
 ```
-It may take a thile to pull dependencies if you haven't had then already.
-This builds the plugin in `./build/`
+It may take a while to pull dependencies if you haven't had them already.
+This builds the plugin in `./build/linux/x86_64/snap-plugin-collector-entropy`
 
 
 ### Configuration and Usage
@@ -32,7 +32,7 @@ This builds the plugin in `./build/`
 
 #### Load the plugin
 ```
-$ snaptel plugin load build/snap-plugin-collector-entropy
+$ snaptel plugin load build/linux/x86_64/snap-plugin-collector-entropy
 $ snaptel metric list
 ```
 
@@ -59,3 +59,5 @@ Create entropy-task.yaml:
 Create task in Snap:
 ```
 $ snaptel task create -t entropy-task.yaml
+
+
