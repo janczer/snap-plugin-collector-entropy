@@ -30,13 +30,18 @@ import (
 )
 
 var srcMockFile = "/tmp/mock_entropy_avail"
+var srcMockFileValue = []byte("444\n")
 
 func createMockFile() {
 	deleteMockFile()
-	srcMockFileCont := []byte("444\n")
 	f, _ := os.Create(srcMockFile)
-	f.Write(srcMockFileCont)
+	f.Write(srcMockFileValue)
 	f.Close()
+}
+
+func createEmptyMockFile() {
+	srcMockFileValue = []byte("")
+	createMockFile()
 }
 
 func deleteMockFile() {
@@ -44,7 +49,6 @@ func deleteMockFile() {
 }
 
 func TestEntropyCollector(t *testing.T) {
-
 	ec := EntropyCollector{}
 	createMockFile()
 
@@ -79,8 +83,20 @@ func TestEntropyCollector(t *testing.T) {
 			e, err := getEntropy()
 			So(err, ShouldBeNil)
 			So(e, ShouldBeGreaterThan, 0)
+			So(e, ShouldEqual, 444)
+		})
+		Convey("File not found", func() {
+			deleteMockFile()
+			e, err := getEntropy()
+			So(e, ShouldEqual, 0)
+			So(err, ShouldNotBeNil)
+		})
+		Convey("Empty file", func() {
+			createEmptyMockFile()
+			e, err := getEntropy()
+			So(e, ShouldEqual, 0)
+			So(err, ShouldNotBeNil)
 		})
 	})
 	deleteMockFile()
-
 }
