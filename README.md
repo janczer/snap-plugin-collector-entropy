@@ -5,10 +5,18 @@ This plugin collects entropy metrics from file `/proc/sys/kernel/random/entropy_
 It's used in the [Snap framework](https://github.com/intelsdi-x/snap).
 
 1. [Getting Started](#getting-started)
+  * [System Requirements](#system-requirements)
+  * [Operating Systems](#operating-systems)
   * [Installation](#installation)
   * [Configuration and Usage](#configuration-and-usage)
 
 ## Getting Started
+
+### System Requirements
+* [golang 1.5+](https://golang.org/dl/) - needed only for building
+
+### Operating Systems
+* Linux/amd64
 
 ### Installation
 #### Build the plugin binary:
